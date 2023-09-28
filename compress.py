@@ -1,11 +1,10 @@
 """Image Compressor
 
-This script converts a given image file into grayscale and compresses
-it using Fourier transforms. Image dimensions are cropped to a multiple
-of 32.
+This script converts given image files into grayscale and compresses them using
+Fourier transforms. Image dimensions are cropped to a multiple of 32.
 
-This script requires that `numpy` and 'pillow' be installed within the
-Python environment.
+This script requires that `numpy` and 'pillow' be installed within the Python
+environment.
 
 This file can also be imported as a module and contains the following
 functions:
@@ -68,17 +67,22 @@ def compress(image, tol):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        'input_file',
+        'input_files',
         type=str,
-        help="The image file to be compressed"
+        nargs='+',
+        help="The image file(s) to be compressed"
     )
     args = parser.parse_args()
 
-    grayscale_image = np.array(Image.open(args.input_file).convert('L'))
-    compressed_image, drop_rate = compress(grayscale_image, COEFFICIENT_TOLERANCE_VALUE)
-    Image.fromarray(compressed_image).convert('L').save('compressed_' + args.input_file)
+    for filename in args.input_files:
+        try:
+            grayscale_image = np.array(Image.open(filename).convert('L'))
+            compressed_image, drop_rate = compress(grayscale_image, COEFFICIENT_TOLERANCE_VALUE)
+            Image.fromarray(compressed_image).convert('L').save('compressed_' + filename)
 
-    print('Image successfully compressed with a drop rate of {:.2f}!'.format(drop_rate))
+            print('Success! {} compressed with a drop rate of {:.2f}'.format(filename, drop_rate))
+        except Exception as err:
+            print(err)
 
 
 if __name__ == "__main__":
